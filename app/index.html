@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>KISS Controlebegroting</title>
+<meta name="description" content="KISS: controlebegroting, kostprijs, adviesprijs en minimumprijs voor accountantskantoren. Demo met voorbeelddata.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Roboto+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="styles.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%23D3E3FD'/%3E%3Crect x='9' y='9' width='14' height='14' rx='3' fill='%230B57D0'/%3E%3C/svg%3E">
+</head>
+<body>
+
+<header class="topbar">
+  <a class="brand" href="#opdracht" aria-label="KISS, naar opdrachten"><span class="mark" aria-hidden="true"></span>KISS<span class="demo-tag">Demo</span></a>
+  <nav class="tabs" aria-label="Hoofdmenu">
+    <a href="#opdracht" data-view="opdracht"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5M10 13h6M10 17h6"/></svg><span>Opdrachten</span></a>
+    <a href="#portefeuille" data-view="portefeuille"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span>Portefeuille</span></a>
+    <a href="#instellingen" data-view="instellingen"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg><span>Instellingen</span></a>
+    <a href="#bibliotheek" data-view="bibliotheek"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h5v16H4zM10 4h5v16h-5zM16 5l4 1-3 14-4-1z"/></svg><span>Bibliotheek</span></a>
+  </nav>
+  <div class="top-actions">
+    <label class="btn tonal" for="openFile"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h6l2 2h8v10H4z"/></svg><span>Bestand openen</span></label>
+    <input id="openFile" type="file" accept=".json,.kiss,application/json" hidden>
+  </div>
+</header>
+
+<main id="main">
+
+<!-- ============ OPDRACHTEN ============ -->
+<section id="v-opdracht" class="view">
+  <div class="ws">
+
+    <aside class="rail" aria-label="Opdrachten">
+      <div class="rail-head">
+        <h2>Opdrachten</h2>
+        <button class="btn filled sm" id="newBtn" type="button">+ Nieuw</button>
+      </div>
+      <input id="search" type="search" placeholder="Zoek op code" aria-label="Zoek opdracht">
+      <ul id="list" class="olist"></ul>
+    </aside>
+
+    <div class="head-col">
+      <div class="ohead">
+        <div class="ohead-l">
+          <label class="pick-mobile">Opdracht<select id="pick"></select></label>
+          <input id="f-code" class="code-input" type="text" aria-label="Opdrachtcode" placeholder="Opdrachtcode">
+          <span id="statusPill"></span>
+        </div>
+        <div class="ohead-r">
+          <button class="btn outlined pick-mobile" id="newBtn2" type="button">+ Nieuw</button>
+          <div class="menu">
+            <button class="btn outlined" id="exportBtn" type="button" aria-haspopup="true" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Exporteren</button>
+            <div class="menu-pop" id="exportMenu" hidden>
+              <button type="button" data-exp="xlsx"><b>Excel</b><span>Begroting, kostprijs en prijs in een .xlsx</span></button>
+              <button type="button" data-exp="pdf"><b>PDF / afdrukken</b><span>Nette begroting als document</span></button>
+              <button type="button" data-exp="kiss"><b>KISS-bestand</b><span>Later weer openen in KISS</span></button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="importNote"></div>
+    </div>
+
+    <section class="main-col" aria-label="Opdracht">
+
+      <form class="card" id="form" autocomplete="off">
+        <div class="card-h"><h3>Klantkenmerken</h3></div>
+        <div class="fgrid">
+          <label>Netto-omzet (€)<input id="f-omzet" type="number" min="0" step="100000" inputmode="numeric"></label>
+          <label>Huidig honorarium (€)<input id="f-hon" type="number" min="0" step="100" inputmode="numeric"></label>
+          <label>Opdrachtgebonden kosten (€)<input id="f-ogk" type="number" min="0" step="50" inputmode="numeric"></label>
+          <label>Eerstejaarscontrole<select id="f-eerste"><option>Nee</option><option>Ja</option></select></label>
+          <label>Entiteiten<input id="f-ent" type="number" min="1" step="1" inputmode="numeric"></label>
+          <label>Omzetstromen<input id="f-stromen" type="number" min="1" step="1" inputmode="numeric"></label>
+          <label>Processen<input id="f-proc" type="number" min="0" step="1" inputmode="numeric" title="Processen binnen de administratieve organisatie, bijv. verkoop, inkoop, voorraad, personeel"></label>
+          <label>Bankrekeningen<input id="f-bank" type="number" min="0" step="1" inputmode="numeric"></label>
+          <label>Voorraden<select id="f-vrd"><option>Ja</option><option>Nee</option></select></label>
+          <label>Standaard risico<select id="f-defrk"><option value="1">Laag</option><option value="2">Midden</option><option value="3">Hoog</option></select></label>
+          <label>Standaard complexiteit<select id="f-defcx"><option value="1">Laag</option><option value="2">Midden</option><option value="3">Hoog</option></select></label>
+        </div>
+      </form>
+
+      <section class="card">
+        <div class="card-h"><h3>Begroting per werkzaamheid</h3><span class="hint" id="factors"></span></div>
+        <p class="hint">Risico en complexiteit kies je per post. Een aangepaste post is blauw gemarkeerd.</p>
+        <table class="rtable budget" id="budget"></table>
+      </section>
+
+      <section class="card">
+        <div class="card-h"><h3>Nacalculatie vorig jaar</h3><span class="hint">optioneel</span></div>
+        <div class="fgrid five" id="f-werk"></div>
+        <div id="nacalc"></div>
+      </section>
+
+      <section class="card" id="approveCard">
+        <div class="card-h"><h3>Prijs vaststellen en afronden</h3></div>
+        <div class="fgrid two">
+          <label>Offerteprijs (€)<input id="a-prijs" type="number" min="0" step="100" inputmode="numeric"></label>
+          <label><span id="a-margelbl">Marge bij adviesprijs</span><input id="a-marge" type="text" readonly tabindex="-1"></label>
+          <label class="span-all">Reden van afwijking <span class="hint">(verplicht als de offerteprijs afwijkt van de adviesprijs)</span><textarea id="a-reden" rows="2" placeholder="bijv. meerjarige afspraak, eerste jaar, strategische klant"></textarea></label>
+        </div>
+        <div id="a-warn"></div>
+        <div class="actions">
+          <button class="btn filled" id="approve" type="button">Goedkeuren en afronden</button>
+          <button class="btn outlined" id="useAdv" type="button">Adviesprijs overnemen</button>
+        </div>
+        <div id="doneBox" hidden class="done">
+          <div><b>Afgerond.</b> <span id="doneTxt"></span></div>
+          <div class="actions">
+            <button class="btn filled" type="button" data-exp="xlsx">Excel downloaden</button>
+            <button class="btn outlined" type="button" data-exp="pdf">PDF / afdrukken</button>
+            <button class="btn outlined" type="button" data-exp="kiss">KISS-bestand opslaan</button>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <aside class="sum" aria-label="Samenvatting">
+      <div class="card sum-card">
+        <div id="verdict"></div>
+        <div class="kpis" id="prices"></div>
+        <div class="ladder" id="ladder" aria-hidden="true"></div>
+        <div id="warns"></div>
+        <details class="costd">
+          <summary>Kostprijsopbouw</summary>
+          <table class="ctable" id="cost"></table>
+        </details>
+      </div>
+    </aside>
+  </div>
+  <div class="mbar" id="mbar" aria-hidden="true"></div>
+</section>
+
+<!-- ============ PORTEFEUILLE ============ -->
+<section id="v-portefeuille" class="view" hidden>
+  <div class="page">
+    <div class="phead">
+      <div><h1>Portefeuille</h1><p class="lead">Alle opdrachten op volgorde van begrote marge. De laagste marge staat bovenaan.</p></div>
+      <button class="btn outlined" id="exportPort" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Portefeuille naar Excel</button>
+    </div>
+    <div class="tiles" id="tiles"></div>
+    <section class="card"><table class="rtable port" id="port"></table></section>
+  </div>
+</section>
+
+<!-- ============ INSTELLINGEN ============ -->
+<section id="v-instellingen" class="view" hidden>
+  <div class="page">
+    <div class="phead"><div><h1>Kantoorinstellingen</h1><p class="lead">Tarieven, toeslagen en margedoelen. Alle waarden zijn voorbeelden en rekenen direct door in alle opdrachten.</p></div></div>
+    <div class="cgrid">
+      <section class="card"><div class="card-h"><h3>Direct kostentarief per uur</h3></div>
+        <div class="fgrid two" id="s-tar"></div>
+        <p class="hint">Salaris plus werkgeverslasten, zonder overhead. De overhead zit in de toeslag.</p></section>
+      <section class="card"><div class="card-h"><h3>Prijsbeleid</h3></div>
+        <div class="fgrid two">
+          <label class="span-all">Prijsmethode
+            <span class="seg" id="s-meth"><button type="button" data-v="Marge">Marge op omzet</button><button type="button" data-v="Opslag">Opslag op kostprijs</button></span></label>
+          <label>Gewenste marge op omzet (%)<input id="s-mar" type="number" step="1" min="0" max="95"></label>
+          <label>Winstopslag op kostprijs (%)<input id="s-ops" type="number" step="1" min="0"></label>
+          <label>Minimale marge op omzet (%)<input id="s-min" type="number" step="1" min="0" max="95"></label>
+          <label>Toeslag indirecte kosten (%)<input id="s-toe" type="number" step="1" min="0"></label>
+          <label class="span-all">Extra uren eerstejaarscontrole, op alle werkzaamheden (%)<input id="s-eerste" type="number" step="1" min="0"></label>
+        </div>
+        <div id="s-warn"></div></section>
+      <section class="card"><div class="card-h"><h3>Factoren</h3></div><div id="s-fac"></div></section>
+    </div>
+    <div class="actions" style="margin-top:20px"><button class="btn outlined" id="reset" type="button">Demo terugzetten naar voorbeelddata</button><span class="hint" id="resetMsg"></span></div>
+  </div>
+</section>
+
+<!-- ============ BIBLIOTHEEK ============ -->
+<section id="v-bibliotheek" class="view" hidden>
+  <div class="page">
+    <div class="phead">
+      <div><h1>Bibliotheek</h1><p class="lead">Per jaarrekeningpost de werkzaamheden, de normtijd en de verdeling over functieniveaus. Voorbeeldwaarden: vervang ze door de normtijden van het kantoor.</p></div>
+      <button class="btn filled" id="addRow" type="button">+ Werkzaamheid</button>
+    </div>
+    <details class="card drivers"><summary>Hoe rekenen de drivers?</summary>
+      <ul>
+        <li><b>Vast</b>: vaste uren</li>
+        <li><b>Omvang</b>: × omvangfactor (naar omzet)</li>
+        <li><b>Voorraad</b>: × omvangfactor, alleen bij voorraden</li>
+        <li><b>Per extra entiteit</b>: × (entiteiten − 1)</li>
+        <li><b>Per omzetstroom</b>: × omzetstromen × omvangfactor</li>
+        <li><b>Per proces</b>: × processen</li>
+        <li><b>Per bankrekening</b>: × bankrekeningen</li>
+        <li><b>Alleen eerste jaar</b>: alleen bij een eerstejaarscontrole</li>
+      </ul>
+      <p class="hint">Daarna × de risico- en complexiteitsfactor van de post, en bij een eerstejaarscontrole × de toeslag eerste jaar.</p>
+    </details>
+    <section class="card"><table class="rtable lib" id="lib"></table></section>
+  </div>
+</section>
+
+</main>
+
+<nav class="bnav" aria-label="Hoofdmenu">
+  <a href="#opdracht" data-view="opdracht"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5M10 13h6M10 17h6"/></svg><span>Opdrachten</span></a>
+  <a href="#portefeuille" data-view="portefeuille"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span>Portefeuille</span></a>
+  <a href="#instellingen" data-view="instellingen"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg><span>Instellingen</span></a>
+  <a href="#bibliotheek" data-view="bibliotheek"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h5v16H4zM10 4h5v16h-5zM16 5l4 1-3 14-4-1z"/></svg><span>Bibliotheek</span></a>
+</nav>
+
+<div id="print" class="print-only"></div>
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
