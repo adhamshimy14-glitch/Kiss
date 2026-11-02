@@ -51,6 +51,7 @@
         </div>
         <div class="ohead-r">
           <button class="btn outlined pick-mobile" id="newBtn2" type="button">+ Nieuw</button>
+          <button class="btn outlined danger" id="delBtn" type="button" aria-label="Opdracht verwijderen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg><span>Verwijderen</span></button>
           <div class="menu">
             <button class="btn outlined" id="exportBtn" type="button" aria-haspopup="true" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Exporteren</button>
             <div class="menu-pop" id="exportMenu" hidden>
@@ -205,7 +206,7 @@
 </nav>
 
 <div id="print" class="print-only"></div>
-<div class="toast" id="toast" role="status" hidden></div>
+<div class="toast" id="toast" role="status" hidden><span id="toastTxt"></span><button type="button" id="toastAct" hidden></button></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="app.js"></script>

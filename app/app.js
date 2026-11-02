@@ -65,7 +65,12 @@ const today = () => new Date().toLocaleDateString("nl-NL", { day: "numeric", mon
 const fileStamp = () => new Date().toISOString().slice(0, 10);
 const safeName = s => (String(s || "opdracht").replace(/[^\w.-]+/g, "_").slice(0, 40) || "opdracht");
 
-function toast(t) { const el = $("toast"); el.textContent = t; el.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => { el.hidden = true; }, 2600); }
+function toast(t, actLabel, act) {
+  const el = $("toast"), b = $("toastAct");
+  $("toastTxt").textContent = t; el.hidden = false;
+  b.hidden = !actLabel; b.textContent = actLabel || ""; b.onclick = act ? () => { el.hidden = true; act(); } : null;
+  clearTimeout(toast.t); toast.t = setTimeout(() => { el.hidden = true; }, actLabel ? 8000 : 2600);
+}
 
 /* ---------- calculation ---------- */
 function postVal(o, post) { return (o.posts && o.posts[post]) || o.def || [2, 2]; }
@@ -147,7 +152,7 @@ function readForm() {
   o.eerste = $("f-eerste").value; o.stromen = Math.max(1, +$("f-stromen").value || 1); o.proc = Math.max(0, +$("f-proc").value || 0); o.bank = Math.max(0, +$("f-bank").value || 0);
   o.def = [+$("f-defcx").value, +$("f-defrk").value];
   o.hon = +$("f-hon").value || 0; o.ogk = +$("f-ogk").value || 0; o.werk = LV.map((_, i) => +$("f-w" + i).value || 0);
-  unapprove(o); save();
+  delete o._auto; unapprove(o); save();
 }
 const onFormInput = () => { readForm(); renderList(); renderCalc(); };
 $("form").addEventListener("input", onFormInput);
@@ -256,6 +261,25 @@ function newOpd() {
   if (location.hash !== "#opdracht" && location.hash !== "") location.hash = "opdracht"; else renderOpd();
   $("f-omzet").focus();
 }
+/* ---------- verwijderen (twee keer klikken, daarna ongedaan maken mogelijk) ---------- */
+let delArmed = false;
+function disarmDel() { delArmed = false; const b = $("delBtn"); b.classList.remove("armed"); b.querySelector("span").textContent = "Verwijderen"; }
+$("delBtn").addEventListener("click", () => {
+  const b = $("delBtn");
+  if (!delArmed) {
+    delArmed = true; b.classList.add("armed"); b.querySelector("span").textContent = "Nogmaals klikken";
+    clearTimeout(disarmDel.t); disarmDel.t = setTimeout(disarmDel, 4000); return;
+  }
+  clearTimeout(disarmDel.t); disarmDel();
+  const idx = cur, removed = S.opd.splice(idx, 1)[0];
+  if (!S.opd.length) S.opd.push({ code: "K-01", omzet: 1e7, ent: 1, vrd: "Nee", eerste: "Nee", stromen: 1, proc: 3, bank: 1, def: [2, 2], posts: {}, hon: 0, ogk: 0, werk: [0, 0, 0, 0, 0], prijs: null, reden: "", status: "concept", _auto: true });
+  cur = Math.min(idx, S.opd.length - 1); save(); renderOpd();
+  toast(`${removed.code || "Opdracht"} verwijderd`, "Ongedaan maken", () => {
+    if (S.opd.length === 1 && S.opd[0]._auto) S.opd = [];
+    S.opd.splice(Math.min(idx, S.opd.length), 0, removed); cur = S.opd.indexOf(removed); save();
+    if (location.hash !== "#opdracht" && location.hash !== "") location.hash = "opdracht"; else renderOpd();
+  });
+});
 $("newBtn").addEventListener("click", newOpd);
 $("newBtn2").addEventListener("click", newOpd);
 
